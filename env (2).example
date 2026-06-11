@@ -1,0 +1,3 @@
+const db=require('../config/db');
+async function getStats(){const users=await db.query(`SELECT COUNT(*)::int AS count FROM users`,[]);const tracks=await db.query(`SELECT COUNT(*)::int AS count FROM tracks`,[]);const reports=await db.query(`SELECT COUNT(*)::int AS count FROM reports WHERE status='open'`,[]);return {users:users.rows[0].count,tracks:tracks.rows[0].count,reports:reports.rows[0].count,revenue:'Stripe'};}
+module.exports={getStats};

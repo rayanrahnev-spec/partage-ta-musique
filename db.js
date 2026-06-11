@@ -1,0 +1,1 @@
+const repo=require('../repositories/artist.repository');async function createArtist(req,res){res.status(201).json({artist:await repo.createArtist({ownerUserId:req.user.id,publicName:req.body.publicName,bio:req.body.bio})});}async function listArtists(req,res){res.json({artists:await repo.listArtists()});}module.exports={createArtist,listArtists};

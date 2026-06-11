@@ -1,0 +1,1 @@
+const repo=require('../repositories/admin.repository');async function stats(req,res){res.json(await repo.getStats());}module.exports={stats};

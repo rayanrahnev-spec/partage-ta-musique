@@ -1,0 +1,1 @@
+const repo=require('../repositories/report.repository');async function createReport(req,res){res.status(201).json({report:await repo.createReport(req.body)});}async function listReports(req,res){res.json({reports:await repo.listReports()});}module.exports={createReport,listReports};
