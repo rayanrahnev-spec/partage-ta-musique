@@ -1,0 +1,1 @@
+const {createCheckoutSession}=require('../services/payment.service');async function checkout(req,res){res.json(await createCheckoutSession({plan:req.body.plan,userId:req.user.id}));}async function webhook(req,res){res.json({received:true});}module.exports={checkout,webhook};

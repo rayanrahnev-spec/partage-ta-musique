@@ -1,0 +1,23 @@
+{
+  "name": "partage-ta-musique-api",
+  "version": "1.0.0",
+  "scripts": {
+    "dev": "node src/server.js",
+    "start": "node src/server.js",
+    "db:seed": "node src/utils/seed.js"
+  },
+  "dependencies": {
+    "@aws-sdk/client-s3": "^3.600.0",
+    "bcrypt": "^5.1.1",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.18.3",
+    "express-rate-limit": "^7.2.0",
+    "helmet": "^7.1.0",
+    "jsonwebtoken": "^9.0.2",
+    "multer": "^1.4.5-lts.1",
+    "pg": "^8.11.5",
+    "stripe": "^14.25.0",
+    "zod": "^3.23.8"
+  }
+}

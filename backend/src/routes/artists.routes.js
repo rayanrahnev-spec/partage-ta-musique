@@ -1,0 +1,1 @@
+const router=require('express').Router();const {requireAuth}=require('../middleware/auth');const {createArtist,listArtists}=require('../controllers/artists.controller');router.get('/',listArtists);router.post('/',requireAuth,createArtist);module.exports=router;

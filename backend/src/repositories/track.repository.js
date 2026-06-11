@@ -1,0 +1,6 @@
+const db=require('../config/db');
+async function listTracks(){const r=await db.query(`SELECT t.*, a.public_name AS artist_name FROM tracks t JOIN artists a ON a.id=t.artist_id WHERE t.status='published' ORDER BY t.created_at DESC`,[]);return r.rows;}
+async function countTracksByUser(userId){const r=await db.query(`SELECT COUNT(t.id)::int AS count FROM tracks t JOIN artists a ON a.id=t.artist_id WHERE a.owner_user_id=$1`,[userId]);return r.rows[0].count;}
+async function createTrack({artistId,title,genre,description,audioUrl,coverUrl,rightsConfirmed,noUnauthorizedSamples}){const r=await db.query(`INSERT INTO tracks (artist_id,title,genre,description,audio_url,cover_url,rights_confirmed,no_unauthorized_samples) VALUES ($1,$2,$3,$4,$5,$6,$7,$8) RETURNING *`,[artistId,title,genre||null,description||null,audioUrl,coverUrl||null,rightsConfirmed,noUnauthorizedSamples]);return r.rows[0];}
+async function incrementPlay(trackId){await db.query(`UPDATE tracks SET plays=plays+1 WHERE id=$1`,[trackId]);}
+module.exports={listTracks,countTracksByUser,createTrack,incrementPlay};

@@ -1,0 +1,1 @@
+const router=require('express').Router();const {requireAuth}=require('../middleware/auth');const {checkout,webhook}=require('../controllers/subscriptions.controller');router.post('/checkout',requireAuth,checkout);router.post('/webhook',webhook);module.exports=router;
