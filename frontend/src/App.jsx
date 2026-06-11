@@ -80,18 +80,34 @@ function App() {
     }
   }
 
-  async function createArtist(e) {
-    e.preventDefault();
-    const fd = new FormData(e.currentTarget);
-    try {
-      await api.post("/artists", { publicName: fd.get("publicName"), bio: fd.get("bio") });
-      e.currentTarget.reset();
-      await loadArtists();
-      alert("Artiste créé.");
-    } catch {
-      alert("Connecte-toi d’abord puis vérifie le backend.");
-    }
+ async function createArtist(e) {
+  e.preventDefault();
+
+  const savedToken = localStorage.getItem("ptm_token");
+
+  if (!savedToken) {
+    alert("Tu n'es pas connecté. Clique d'abord sur Créer compte test.");
+    return;
   }
+
+  setAuthToken(savedToken);
+
+  const fd = new FormData(e.currentTarget);
+
+  try {
+    await api.post("/artists", {
+      publicName: fd.get("publicName"),
+      bio: fd.get("bio")
+    });
+
+    e.currentTarget.reset();
+    await loadArtists();
+    alert("Artiste créé.");
+  } catch (err) {
+    alert(err.response?.data?.error || "Erreur création artiste");
+    console.log(err.response?.data || err);
+  }
+}
 
   async function uploadTrack(e) {
     e.preventDefault();
