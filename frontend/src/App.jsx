@@ -331,7 +331,7 @@ function Admin({tracks, adminStats}){return <section className="page"><h1>Admin<
 
 function Production(){return <section className="page"><h1>Production</h1><div className="grid"><Info title="Frontend" text="Vercel"/><Info title="Backend" text="Render/Railway"/><Info title="DB" text="Supabase PostgreSQL"/><Info title="Audio" text="Supabase Storage"/><Info title="Paiement" text="Stripe"/><Info title="Légal" text="CGU/RGPD"/></div></section>}
 
-function ArtistCard({artist}) {
+function ArtistCard({artist,onOpen}) {
   return (
     <div
       className="artist-card"
