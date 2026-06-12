@@ -403,12 +403,14 @@ function Creator({tracks,artists,setSelectedArtist}){
 
   return <section className="page">
     <h1>Dashboard créateur</h1>
+
     <div className="hero" style={{marginBottom:"24px"}}>
       <div>
         <span className="pill">Statistiques créateur</span>
         <h1>Analyse tes sons comme un pro.</h1>
-        <p>Résumé rapide de tes titres, artistes, écoutes et likes. Les statistiques avancées arriveront ensuite.</p>
+        <p>Résumé rapide de tes titres, artistes, écoutes, likes et performances.</p>
       </div>
+
       <div className="phone">
         <div>🎧 {totalPlays} écoutes</div>
         <div>❤️ {totalLikes} likes</div>
@@ -444,6 +446,7 @@ function Top50({tracks,setNow}) {
         <h1>Top 50 des sons les plus chauds.</h1>
         <p>Classement calculé avec les écoutes et les likes. Plus un son est écouté et liké, plus il monte.</p>
       </div>
+
       <div className="phone">
         <div>🏆 Classement</div>
         <div>❤️ Likes</div>
@@ -453,6 +456,7 @@ function Top50({tracks,setNow}) {
     </div>
 
     <SectionTitle title="Top 50" />
+
     <div className="list">
       {ranked.length ? ranked.map((t,i)=>(
         <div className="row" key={t.id}>
