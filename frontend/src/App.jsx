@@ -133,39 +133,32 @@ function App() {
     }
   }
 async function likeTrack(trackId) {
-  function Player({now, likeTrack}) {
-  const src = now?.audio_url || "";
+    const savedToken = localStorage.getItem("ptm_token");
 
-  return (
-    <div className="player player-pro">
-      <div className="player-track">
-        <div
-          className="player-cover"
-          style={now?.cover_url ? { backgroundImage: `url(${now.cover_url})` } : {}}
-        >
-          {!now?.cover_url && "🎧"}
-        </div>
+    if (!savedToken) {
+      alert("Connecte-toi d'abord.");
+      return;
+    }
 
-        <div>
-          <b>{now ? now.title : "Aucun titre sélectionné"}</b>
-          <p>{now ? (now.artist_name || now.artist || "Artiste") : "Choisis une musique"}</p>
-        </div>
-      </div>
+    setAuthToken(savedToken);
 
-      {src ? (
-        <audio src={src} controls autoPlay />
-      ) : (
-        <button onClick={() => alert("Choisis une vraie musique.")}>▶</button>
-      )}
+    try {
+      const res = await api.post(`/likes/tracks/${trackId}`);
+      await loadTracks();
 
-      <div className="player-actions">
-        <button onClick={() => now && likeTrack(now.id)}>❤️ {now?.likes || 0}</button>
-        <button>⭐</button>
-        <button>⋯</button>
-      </div>
-    </div>
-  );
-}
+      setNow(prev => {
+        if (!prev || prev.id !== trackId) return prev;
+        const currentLikes = Number(prev.likes) || 0;
+        return {
+          ...prev,
+          likes: res.data.liked ? currentLikes + 1 : Math.max(currentLikes - 1, 0)
+        };
+      });
+    } catch (err) {
+      alert(err.response?.data?.error || "Impossible de liker.");
+    }
+  }
+
   async function checkout(plan) {
     try {
       const res = await api.post("/subscriptions/checkout", { plan });
@@ -395,7 +388,7 @@ function Row({t,setNow}){
 function Info({title,text}){return <div className="info"><b>{title}</b><p>{text}</p></div>}
 function Empty({text}){return <div className="info"><b>Vide</b><p>{text}</p></div>}
 
-function Player({now}) {
+function Player({now, likeTrack}) {
   const src = now?.audio_url || "";
 
   return (
@@ -421,7 +414,7 @@ function Player({now}) {
       )}
 
       <div className="player-actions">
-        <button>❤️</button>
+        <button onClick={() => now && likeTrack(now.id)}>❤️ {now?.likes || 0}</button>
         <button>⭐</button>
         <button>⋯</button>
       </div>
