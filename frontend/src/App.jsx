@@ -284,7 +284,18 @@ async function likeTrack(trackId) {
       />
     )}
 
-  <Player now={now} likeTrack={likeTrack} openComments={openComments}/>
+    {commentsTrack && (
+      <CommentsModal
+        track={commentsTrack}
+        comments={comments}
+        commentText={commentText}
+        setCommentText={setCommentText}
+        sendComment={sendComment}
+        onClose={() => setCommentsTrack(null)}
+      />
+    )}
+
+    <Player now={now} likeTrack={likeTrack} openComments={openComments}/>
   </div>
 }
 
