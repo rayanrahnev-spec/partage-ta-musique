@@ -132,7 +132,24 @@ function App() {
       alert(err.response?.data?.error || "Upload impossible. Vérifie connexion, artiste et fichier audio.");
     }
   }
+async function likeTrack(trackId) {
+  const savedToken = localStorage.getItem("ptm_token");
 
+  if (!savedToken) {
+    alert("Connecte-toi d'abord.");
+    return;
+  }
+
+  setAuthToken(savedToken);
+
+  try {
+    const res = await api.post(`/likes/tracks/${trackId}`);
+    await loadTracks();
+    alert(res.data.liked ? "Musique likée ❤️" : "Like retiré");
+  } catch (err) {
+    alert(err.response?.data?.error || "Impossible de liker.");
+  }
+}
   async function checkout(plan) {
     try {
       const res = await api.post("/subscriptions/checkout", { plan });
