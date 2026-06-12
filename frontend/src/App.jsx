@@ -462,12 +462,9 @@ function Player({now, likeTrack, openComments}) {
       )}
 
       <div className="player-actions">
-       <button onClick={() => {
-  alert("CLICK");
-  now && openComments(now);
-}}>
-  💬
-</button>
+        <button onClick={() => now && likeTrack(now.id)}>❤️ {now?.likes || 0}</button>
+        <button onClick={() => now && openComments(now)}>💬</button>
+        <button>⭐</button>
       </div>
     </div>
   );
