@@ -20,6 +20,7 @@ function App() {
   const [status, setStatus] = useState("Mode démo");
   const [adminStats, setAdminStats] = useState(null);
   const [query, setQuery] = useState("");
+  const [selectedArtist, setSelectedArtist] = useState(null);
 
   useEffect(() => {
     if (token) setAuthToken(token);
@@ -192,7 +193,89 @@ function App() {
       {page==="admin" && <Admin tracks={tracks} adminStats={adminStats}/>}
       {page==="production" && <Production/>}
     </main>
+{selectedArtist && (
+  <div
+    style={{
+      position: "fixed",
+      inset: 0,
+      background: "rgba(0,0,0,.85)",
+      zIndex: 9999,
+      overflow: "auto"
+    }}
+  >
+    <div
+      style={{
+        maxWidth: "1100px",
+        margin: "40px auto",
+        background: "#0f172a",
+        borderRadius: "30px",
+        overflow: "hidden",
+        border: "1px solid rgba(255,255,255,.08)"
+      }}
+    >
+      <div
+        style={{
+          height: "260px",
+          backgroundImage: selectedArtist.banner_url
+            ? `url(${selectedArtist.banner_url})`
+            : undefined,
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+          backgroundColor: "#1e293b"
+        }}
+      />
 
+      <div style={{ padding: "30px" }}>
+        <div
+          style={{
+            width: "140px",
+            height: "140px",
+            borderRadius: "50%",
+            marginTop: "-100px",
+            border: "6px solid #0f172a",
+            backgroundImage: selectedArtist.avatar_url
+              ? `url(${selectedArtist.avatar_url})`
+              : undefined,
+            backgroundSize: "cover",
+            backgroundPosition: "center",
+            backgroundColor: "#7c3aed"
+          }}
+        />
+
+        <h1>{selectedArtist.public_name}</h1>
+
+        <p style={{ color: "#94a3b8" }}>
+          {selectedArtist.bio || "Artiste indépendant"}
+        </p>
+
+        <div style={{ display: "flex", gap: "12px", marginTop: "20px" }}>
+          <div className="info">
+            <b>{selectedArtist.track_count || 0}</b>
+            <p>Titres</p>
+          </div>
+
+          <div className="info">
+            <b>0</b>
+            <p>Followers</p>
+          </div>
+
+          <div className="info">
+            <b>0</b>
+            <p>Likes</p>
+          </div>
+        </div>
+
+        <button
+          className="primary"
+          style={{ marginTop: "20px" }}
+          onClick={() => setSelectedArtist(null)}
+        >
+          Fermer
+        </button>
+      </div>
+    </div>
+  </div>
+)}
     <Player now={now}/>
   </div>
 }
