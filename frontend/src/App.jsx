@@ -227,7 +227,7 @@ async function likeTrack(trackId) {
       />
     )}
 
-    <Player now={now}/>
+  <Player now={now} likeTrack={likeTrack}/>
   </div>
 }
 
