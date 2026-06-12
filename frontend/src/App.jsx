@@ -364,11 +364,36 @@ function Empty({text}){return <div className="info"><b>Vide</b><p>{text}</p></di
 
 function Player({now}) {
   const src = now?.audio_url || "";
-  return <div className="player">
-    <div>{now ? `${now.title} — ${now.artist_name || now.artist}` : "Aucun titre sélectionné"}</div>
-    {src ? <audio src={src} controls/> : <button onClick={()=>alert("Démo sans fichier audio.")}>▶</button>}
-    <div className="bar"></div>
-  </div>
+
+  return (
+    <div className="player player-pro">
+      <div className="player-track">
+        <div
+          className="player-cover"
+          style={now?.cover_url ? { backgroundImage: `url(${now.cover_url})` } : {}}
+        >
+          {!now?.cover_url && "🎧"}
+        </div>
+
+        <div>
+          <b>{now ? now.title : "Aucun titre sélectionné"}</b>
+          <p>{now ? (now.artist_name || now.artist || "Artiste") : "Choisis une musique"}</p>
+        </div>
+      </div>
+
+      {src ? (
+        <audio src={src} controls autoPlay />
+      ) : (
+        <button onClick={() => alert("Choisis une vraie musique.")}>▶</button>
+      )}
+
+      <div className="player-actions">
+        <button>❤️</button>
+        <button>⭐</button>
+        <button>⋯</button>
+      </div>
+    </div>
+  );
 }
 
 createRoot(document.getElementById("root")).render(<App/>);
