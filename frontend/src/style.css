@@ -69,3 +69,8 @@
   overflow-y: auto !important;
   padding: 30px !important;
 }
+.nav{
+  display:flex !important;
+  visibility:visible !important;
+  opacity:1 !important;
+}
