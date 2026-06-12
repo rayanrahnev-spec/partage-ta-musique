@@ -5,7 +5,6 @@ import { api, setAuthToken } from "./lib/api";
 import "./style.css";
 
 console.log("APP VERSION TEST 999");
-
 const demoTracks = [
   { id: "demo1", title: "Bruxelles Minuit", artist_name: "NOVA INDÉ", genre: "Rap", plays: 8200, likes: 540, icon: "🌃", audio_url: "" },
   { id: "demo2", title: "Soleil d'été", artist_name: "LINA WAVE", genre: "Afro", plays: 6400, likes: 430, icon: "🌴", audio_url: "" },
