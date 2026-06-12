@@ -40,6 +40,7 @@ app.use("/api/follows", require("./routes/follows.routes"));
 app.use("/api/subscriptions", require("./routes/subscriptions.routes"));
 app.use("/api/reports", require("./routes/reports.routes"));
 app.use("/api/admin", require("./routes/admin.routes"));
+app.use("/api/favorites", require("./routes/favorites.routes"));
 
 app.use((err, req, res, next) => {
   console.error("SERVER ERROR:", err);
