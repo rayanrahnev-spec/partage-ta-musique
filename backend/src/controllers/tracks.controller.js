@@ -1,5 +1,4 @@
 const tracks = require('../repositories/track.repository');
-const users = require('../repositories/user.repository');
 const { uploadAudio } = require('../services/storage.service');
 
 async function listTracks(req, res) {
@@ -7,7 +6,11 @@ async function listTracks(req, res) {
 }
 
 async function createTrack(req, res) {
-  const audio = await uploadAudio(req.file);
+  const audioFile = req.files?.audio?.[0];
+  const coverFile = req.files?.cover?.[0] || null;
+
+  const audio = await uploadAudio(audioFile);
+  const cover = coverFile ? await uploadAudio(coverFile) : null;
 
   const track = await tracks.createTrack({
     artistId: req.body.artistId,
@@ -15,7 +18,7 @@ async function createTrack(req, res) {
     genre: req.body.genre,
     description: req.body.description,
     audioUrl: audio.url,
-    coverUrl: null,
+    coverUrl: cover ? cover.url : null,
     rightsConfirmed: true,
     noUnauthorizedSamples: true
   });
