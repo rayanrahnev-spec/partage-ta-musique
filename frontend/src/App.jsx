@@ -83,6 +83,7 @@ function App() {
  async function createArtist(e) {
   e.preventDefault();
 
+  const form = e.currentTarget;
   const savedToken = localStorage.getItem("ptm_token");
 
   if (!savedToken) {
@@ -92,7 +93,7 @@ function App() {
 
   setAuthToken(savedToken);
 
-  const fd = new FormData(e.currentTarget);
+  const fd = new FormData(form);
 
   try {
     await api.post("/artists", {
@@ -100,7 +101,7 @@ function App() {
       bio: fd.get("bio")
     });
 
-    e.currentTarget.reset();
+    form.reset();
     await loadArtists();
     alert("Artiste créé.");
   } catch (err) {
