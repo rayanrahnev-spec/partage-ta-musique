@@ -334,10 +334,10 @@ function Production(){return <section className="page"><h1>Production</h1><div c
 function ArtistCard({artist,onOpen}) {
   return (
     <div
-      className="artist-card"
-      onClick={() => alert(`Profil artiste : ${artist.public_name}\n\nLa page artiste complète arrive dans la prochaine étape.`)}
-      style={{cursor:"pointer"}}
-    >
+  className="artist-card"
+  onClick={() => onOpen && onOpen(artist)}
+  style={{ cursor: "pointer" }}
+>
       <div
         className="artist-banner"
         style={artist.banner_url ? {backgroundImage:`url(${artist.banner_url})`} : {}}
