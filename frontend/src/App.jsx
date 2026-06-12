@@ -253,7 +253,8 @@ async function likeTrack(trackId) {
 
       alert(res.data.favorited ? "Ajouté aux favoris ⭐" : "Retiré des favoris");
     } catch (err) {
-      alert(err.response?.data?.error || "Impossible d'ajouter aux favoris.");
+      console.log(err.response?.data || err);
+      alert(err.response?.data?.error || "Impossible d'ajouter aux favoris. Vérifie que Render est redéployé avec /api/favorites.");
     }
   }
 
@@ -290,10 +291,15 @@ async function likeTrack(trackId) {
   return <div className="app">
     <aside className="sidebar">
       <div className="logo"><div>🎧</div><span>Partage<br/>ta musique</span></div>
+
+      <div style={{margin:"0 0 14px",padding:"10px 12px",borderRadius:"14px",background:"rgba(34,197,94,.14)",border:"1px solid rgba(34,197,94,.28)",color:"#bbf7d0",fontWeight:900}}>
+        ✅ PACK RAPIDE ACTIF
+      </div>
+
       <Nav icon={<Home/>} label="Accueil pro" id="landing" page={page} setPage={setPage}/>
+      <Nav icon={<Crown/>} label="🏆 Top 50" id="top50" page={page} setPage={setPage}/>
       <Nav icon={<Music/>} label="Musiques" id="home" page={page} setPage={setPage}/>
       <Nav icon={<Search/>} label="Découvrir" id="discover" page={page} setPage={setPage}/>
-      <Nav icon={<Crown/>} label="Top 50" id="top50" page={page} setPage={setPage}/>
       <Nav icon={<PlusCircle/>} label="Créer artiste" id="artistCreate" page={page} setPage={setPage}/>
       <Nav icon={<Upload/>} label="Publier" id="upload" page={page} setPage={setPage}/>
       <Nav icon={<BarChart3/>} label="Créateur" id="creator" page={page} setPage={setPage}/>
@@ -311,6 +317,7 @@ async function likeTrack(trackId) {
     <main>
       <header className="topbar">
         <input value={query} onChange={(e)=>setQuery(e.target.value)} placeholder="Rechercher titre, artiste, genre..."/>
+        <button className="primary" onClick={()=>setPage("top50")}>🏆 Top 50</button>
         <div className="account"><User size={18}/> {user?.publicName || user?.public_name || "Rayan Studio"}</div>
       </header>
 
@@ -367,6 +374,7 @@ function Landing({setPage, tracks, artists, setNow, setSelectedArtist}){
         <p>Upload audio, covers, profils artistes, lecture en ligne, dashboard créateur et abonnement pro.</p>
         <button className="primary" onClick={()=>setPage("upload")}>Publier un son</button>
         <button onClick={()=>setPage("discover")}>Découvrir</button>
+        <button onClick={()=>setPage("top50")}>🏆 Voir Top 50</button>
       </div>
       <div className="phone">
         <div>🔥 Derniers sons</div>
@@ -608,7 +616,7 @@ function Player({now, likeTrack, openComments, toggleFavoriteTrack, isFavorite})
       <div className="player-actions">
         <button onClick={() => now && likeTrack(now.id)}>❤️ {now?.likes || 0}</button>
         <button onClick={() => now && openComments(now)}>💬</button>
-        <button onClick={() => now && toggleFavoriteTrack(now.id)}>{isFavorite ? "⭐" : "☆"}</button>
+        <button onClick={() => now && toggleFavoriteTrack(now.id)}>{isFavorite ? "⭐ Favori" : "☆ Favori"}</button>
       </div>
     </div>
   );
