@@ -7,12 +7,21 @@ require("dotenv").config();
 const app = express();
 
 app.use(cors());
-app.use(helmet({ crossOriginResourcePolicy: false }));
+app.use(
+  helmet({
+    crossOriginResourcePolicy: false
+  })
+);
 
 app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ extended: true }));
 
-app.use(rateLimit({ windowMs: 60 * 1000, max: 300 }));
+app.use(
+  rateLimit({
+    windowMs: 60 * 1000,
+    max: 300
+  })
+);
 
 app.get("/", (req, res) => {
   res.json({
@@ -27,16 +36,21 @@ app.use("/api/artists", require("./routes/artists.routes"));
 app.use("/api/tracks", require("./routes/tracks.routes"));
 app.use("/api/likes", require("./routes/likes.routes"));
 app.use("/api/comments", require("./routes/comments.routes"));
+app.use("/api/follows", require("./routes/follows.routes"));
 app.use("/api/subscriptions", require("./routes/subscriptions.routes"));
 app.use("/api/reports", require("./routes/reports.routes"));
 app.use("/api/admin", require("./routes/admin.routes"));
 
 app.use((err, req, res, next) => {
   console.error("SERVER ERROR:", err);
+
   res.status(err.status || 500).json({
     error: err.message || "Server error"
   });
 });
 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`API started on port ${PORT}`));
+
+app.listen(PORT, () => {
+  console.log(`API started on port ${PORT}`);
+});
