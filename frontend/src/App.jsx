@@ -307,7 +307,11 @@ function Landing({setPage, tracks, artists, setNow}){
     <div className="cards">{latest.map(t=><Card key={t.id} t={t} setNow={setNow}/>)}</div>
 
     <SectionTitle title="Artistes à découvrir" action="Créer artiste" onClick={()=>setPage("artistCreate")}/>
-    <div className="artist-grid">{popularArtists.length ? popularArtists.map(a=><ArtistCard key={a.id} artist={a}/>) : <Empty text="Crée ton premier artiste pour l’afficher ici."/>}</div>
+    <div className="artist-grid">{popularArtists.length ? popularArtists.map(a=><ArtistCard
+  key={a.id}
+  artist={a}
+  onOpen={setSelectedArtist}
+/>) : <Empty text="Crée ton premier artiste pour l’afficher ici."/>}</div>
   </section>
 }
 
