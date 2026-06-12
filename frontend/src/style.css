@@ -61,3 +61,11 @@
   padding:0;
   border-radius:50%;
 }
+.comments-modal{
+  position: fixed !important;
+  inset: 0 !important;
+  z-index: 9999999 !important;
+  background: rgba(0,0,0,.88) !important;
+  overflow-y: auto !important;
+  padding: 30px !important;
+}
