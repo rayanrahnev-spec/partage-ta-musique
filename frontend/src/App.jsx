@@ -25,6 +25,7 @@ function App() {
   const [comments, setComments] = useState([]);
   const [commentText, setCommentText] = useState("");
   const [followedArtists, setFollowedArtists] = useState({});
+  const [favoriteTracks, setFavoriteTracks] = useState({});
 
   useEffect(() => {
     if (token) setAuthToken(token);
@@ -232,6 +233,30 @@ async function likeTrack(trackId) {
     }
   }
 
+  async function toggleFavoriteTrack(trackId) {
+    const savedToken = localStorage.getItem("ptm_token");
+
+    if (!savedToken) {
+      alert("Connecte-toi d'abord.");
+      return;
+    }
+
+    setAuthToken(savedToken);
+
+    try {
+      const res = await api.post(`/favorites/tracks/${trackId}`);
+
+      setFavoriteTracks(prev => ({
+        ...prev,
+        [trackId]: res.data.favorited
+      }));
+
+      alert(res.data.favorited ? "Ajouté aux favoris ⭐" : "Retiré des favoris");
+    } catch (err) {
+      alert(err.response?.data?.error || "Impossible d'ajouter aux favoris.");
+    }
+  }
+
   async function checkout(plan) {
     try {
       const res = await api.post("/subscriptions/checkout", { plan });
@@ -268,6 +293,7 @@ async function likeTrack(trackId) {
       <Nav icon={<Home/>} label="Accueil pro" id="landing" page={page} setPage={setPage}/>
       <Nav icon={<Music/>} label="Musiques" id="home" page={page} setPage={setPage}/>
       <Nav icon={<Search/>} label="Découvrir" id="discover" page={page} setPage={setPage}/>
+      <Nav icon={<Crown/>} label="Top 50" id="top50" page={page} setPage={setPage}/>
       <Nav icon={<PlusCircle/>} label="Créer artiste" id="artistCreate" page={page} setPage={setPage}/>
       <Nav icon={<Upload/>} label="Publier" id="upload" page={page} setPage={setPage}/>
       <Nav icon={<BarChart3/>} label="Créateur" id="creator" page={page} setPage={setPage}/>
@@ -291,6 +317,7 @@ async function likeTrack(trackId) {
       {page==="landing" && <Landing setPage={setPage} tracks={tracks} artists={artists} setNow={setNow} setSelectedArtist={setSelectedArtist}/>}
       {page==="home" && <HomePage tracks={filteredTracks} setNow={setNow}/>}
       {page==="discover" && <Discover tracks={filteredTracks} artists={artists} setNow={setNow} setSelectedArtist={setSelectedArtist}/>}
+      {page==="top50" && <Top50 tracks={tracks} setNow={setNow}/>}
       {page==="artistCreate" && <ArtistCreate createArtist={createArtist} artists={artists} setSelectedArtist={setSelectedArtist}/>}
       {page==="upload" && <UploadPage uploadTrack={uploadTrack} artists={artists}/>}
       {page==="creator" && <Creator tracks={tracks} artists={artists} setSelectedArtist={setSelectedArtist}/>}
@@ -322,7 +349,7 @@ async function likeTrack(trackId) {
       />
     )}
 
-    <Player now={now} likeTrack={likeTrack} openComments={openComments}/>
+    <Player now={now} likeTrack={likeTrack} openComments={openComments} toggleFavoriteTrack={toggleFavoriteTrack} isFavorite={!!favoriteTracks[now?.id]}/>
   </div>
 }
 
@@ -369,7 +396,77 @@ function ArtistCreate({createArtist, artists, setSelectedArtist}){return <sectio
 
 function UploadPage({uploadTrack, artists}){return <section className="page"><h1>Publier une musique</h1><div className="notice">Tu dois être connecté et avoir créé un artiste. Ajoute un MP3 et une image de couverture pour rendre le son plus professionnel.</div><form className="panel" onSubmit={uploadTrack}><label>Artiste<select name="artistId" required>{artists.map(a=><option key={a.id} value={a.id}>{a.public_name}</option>)}</select></label><label>Titre<input name="title" required placeholder="Titre du morceau"/></label><label>Genre<select name="genre"><option>Rap</option><option>Afro</option><option>R&B</option><option>Électro</option></select></label><label>Description<textarea name="description"/></label><label>Fichier audio<input name="audio" type="file" accept="audio/*" required/></label><label>Image de couverture<input name="cover" type="file" accept="image/*"/></label><div className="notice">En envoyant, tu confirmes que tu possèdes les droits et qu’il n’y a aucun sample non autorisé.</div><button className="primary">Uploader</button></form></section>}
 
-function Creator({tracks,artists,setSelectedArtist}){return <section className="page"><h1>Dashboard créateur</h1><div className="stats"><Info title={tracks.length} text="Titres affichés"/><Info title={artists.length} text="Artistes"/><Info title="Supabase" text="Stockage audio/covers"/><Info title="Stripe" text="Checkout prêt"/></div><SectionTitle title="Tes artistes"/><div className="artist-grid">{artists.map(a=><ArtistCard key={a.id} artist={a} onOpen={setSelectedArtist}/>)}</div><SectionTitle title="Tes musiques"/><div className="list">{tracks.map(t=><Row key={t.id} t={t} setNow={()=>{}}/>)}</div></section>}
+function Creator({tracks,artists,setSelectedArtist}){
+  const totalPlays = tracks.reduce((sum, t) => sum + (Number(t.plays) || 0), 0);
+  const totalLikes = tracks.reduce((sum, t) => sum + (Number(t.likes) || 0), 0);
+  const bestTrack = [...tracks].sort((a,b)=>(Number(b.plays)||0)-(Number(a.plays)||0))[0];
+
+  return <section className="page">
+    <h1>Dashboard créateur</h1>
+    <div className="hero" style={{marginBottom:"24px"}}>
+      <div>
+        <span className="pill">Statistiques créateur</span>
+        <h1>Analyse tes sons comme un pro.</h1>
+        <p>Résumé rapide de tes titres, artistes, écoutes et likes. Les statistiques avancées arriveront ensuite.</p>
+      </div>
+      <div className="phone">
+        <div>🎧 {totalPlays} écoutes</div>
+        <div>❤️ {totalLikes} likes</div>
+        <div>🎵 {tracks.length} titres</div>
+        <div className="phonePlayer">Top : {bestTrack?.title || "Aucun son"}</div>
+      </div>
+    </div>
+
+    <div className="stats">
+      <Info title={tracks.length} text="Titres affichés"/>
+      <Info title={artists.length} text="Artistes"/>
+      <Info title={totalPlays} text="Écoutes totales"/>
+      <Info title={totalLikes} text="Likes totaux"/>
+    </div>
+
+    <SectionTitle title="Tes artistes"/>
+    <div className="artist-grid">{artists.map(a=><ArtistCard key={a.id} artist={a} onOpen={setSelectedArtist}/>)}</div>
+
+    <SectionTitle title="Tes musiques"/>
+    <div className="list">{tracks.map(t=><Row key={t.id} t={t} setNow={()=>{}}/>)}</div>
+  </section>
+}
+
+function Top50({tracks,setNow}) {
+  const ranked = [...tracks]
+    .sort((a,b) => ((Number(b.likes)||0)*3 + (Number(b.plays)||0)) - ((Number(a.likes)||0)*3 + (Number(a.plays)||0)))
+    .slice(0,50);
+
+  return <section className="page">
+    <div className="hero">
+      <div>
+        <span className="pill">Classement officiel</span>
+        <h1>Top 50 des sons les plus chauds.</h1>
+        <p>Classement calculé avec les écoutes et les likes. Plus un son est écouté et liké, plus il monte.</p>
+      </div>
+      <div className="phone">
+        <div>🏆 Classement</div>
+        <div>❤️ Likes</div>
+        <div>🎧 Écoutes</div>
+        <div className="phonePlayer">Top 50 Live</div>
+      </div>
+    </div>
+
+    <SectionTitle title="Top 50" />
+    <div className="list">
+      {ranked.length ? ranked.map((t,i)=>(
+        <div className="row" key={t.id}>
+          <div className="thumb">#{i+1}</div>
+          <div>
+            <b>{t.title}</b>
+            <p>{t.artist_name || t.artist || "Artiste"} · {t.genre} · ❤️ {t.likes || 0} · 🎧 {t.plays || 0}</p>
+          </div>
+          <button onClick={()=>setNow(t)}>▶</button>
+        </div>
+      )) : <Empty text="Aucun son pour le moment."/>}
+    </div>
+  </section>
+}
 
 function Premium({checkout}){return <section className="page"><h1>Abonnements</h1><div className="plans">{[{n:"Starter",k:"starter",p:"4,99€",d:"Plus de publications"},{n:"Pro",k:"pro",p:"9,99€",d:"Profil pro + statistiques"},{n:"Label",k:"label",p:"49€",d:"Multi-artistes"}].map(x=><div className="plan" key={x.k}><h2>{x.n}</h2><div className="price">{x.p}/mois</div><p>{x.d}</p><button className="primary" onClick={()=>checkout(x.k)}>Payer</button></div>)}</div></section>}
 
@@ -479,7 +576,7 @@ function Row({t,setNow}){
 function Info({title,text}){return <div className="info"><b>{title}</b><p>{text}</p></div>}
 function Empty({text}){return <div className="info"><b>Vide</b><p>{text}</p></div>}
 
-function Player({now, likeTrack, openComments}) {
+function Player({now, likeTrack, openComments, toggleFavoriteTrack, isFavorite}) {
   const src = now?.audio_url || "";
 
   return (
@@ -507,7 +604,7 @@ function Player({now, likeTrack, openComments}) {
       <div className="player-actions">
         <button onClick={() => now && likeTrack(now.id)}>❤️ {now?.likes || 0}</button>
         <button onClick={() => now && openComments(now)}>💬</button>
-        <button>⭐</button>
+        <button onClick={() => now && toggleFavoriteTrack(now.id)}>{isFavorite ? "⭐" : "☆"}</button>
       </div>
     </div>
   );
