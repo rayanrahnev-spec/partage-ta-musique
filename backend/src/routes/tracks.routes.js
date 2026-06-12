@@ -3,23 +3,18 @@ const multer = require('multer');
 const upload = multer({ dest: 'uploads/' });
 
 const { requireAuth } = require('../middleware/auth');
-const { validate } = require('../middleware/validate');
-const { createTrackSchema } = require('../validators/track.validator');
-const { listTracks, createTrack, playTrack } = require('../controllers/tracks.controller');
+const { createArtist, listArtists } = require('../controllers/artists.controller');
 
-router.get('/', listTracks);
+router.get('/', listArtists);
 
 router.post(
   '/',
   requireAuth,
   upload.fields([
-    { name: 'audio', maxCount: 1 },
-    { name: 'cover', maxCount: 1 }
+    { name: 'avatar', maxCount: 1 },
+    { name: 'banner', maxCount: 1 }
   ]),
-  validate(createTrackSchema),
-  createTrack
+  createArtist
 );
-
-router.post('/:id/play', playTrack);
 
 module.exports = router;
