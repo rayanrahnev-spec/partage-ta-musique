@@ -6,10 +6,11 @@ require("dotenv").config();
 
 const app = express();
 app.use(helmet());
-app.use(cors({ origin: process.env.APP_URL || "*" }));
-app.use(express.json({ limit: "2mb" }));
-app.use(rateLimit({ windowMs: 60 * 1000, max: 120 }));
-
+app.use(cors({
+  origin: process.env.APP_URL || "https://partage-ta-musique-tugb.vercel.app",
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"]
+}));
 app.get("/", (req, res) => res.json({ app: "Partage ta musique API", version: "1.0.0", status: "ready" }));
 
 app.use("/api/auth", require("./routes/auth.routes"));
