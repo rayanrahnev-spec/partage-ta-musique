@@ -24,6 +24,7 @@ function App() {
   const [commentsTrack, setCommentsTrack] = useState(null);
   const [comments, setComments] = useState([]);
   const [commentText, setCommentText] = useState("");
+  const [followedArtists, setFollowedArtists] = useState({});
 
   useEffect(() => {
     if (token) setAuthToken(token);
@@ -207,6 +208,30 @@ async function likeTrack(trackId) {
     }
   }
 
+  async function toggleFollowArtist(artistId) {
+    const savedToken = localStorage.getItem("ptm_token");
+
+    if (!savedToken) {
+      alert("Connecte-toi d'abord.");
+      return;
+    }
+
+    setAuthToken(savedToken);
+
+    try {
+      const res = await api.post(`/follows/artists/${artistId}`);
+
+      setFollowedArtists(prev => ({
+        ...prev,
+        [artistId]: res.data.followed
+      }));
+
+      alert(res.data.followed ? "Artiste suivi 👥" : "Abonnement retiré");
+    } catch (err) {
+      alert(err.response?.data?.error || "Impossible de suivre cet artiste.");
+    }
+  }
+
   async function checkout(plan) {
     try {
       const res = await api.post("/subscriptions/checkout", { plan });
@@ -280,6 +305,8 @@ async function likeTrack(trackId) {
         tracks={selectedArtistTracks}
         totalPlays={selectedArtistPlays}
         setNow={setNow}
+        isFollowed={!!followedArtists[selectedArtist.id]}
+        toggleFollowArtist={toggleFollowArtist}
         onClose={() => setSelectedArtist(null)}
       />
     )}
@@ -383,7 +410,7 @@ function ArtistCard({artist,onOpen}) {
   );
 }
 
-function ArtistModal({artist, tracks, totalPlays, setNow, onClose}) {
+function ArtistModal({artist, tracks, totalPlays, setNow, isFollowed, toggleFollowArtist, onClose}) {
   return (
     <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,.86)",zIndex:9999,overflow:"auto",padding:"30px"}}>
       <div style={{maxWidth:"1100px",margin:"0 auto 90px",background:"#0f172a",borderRadius:"32px",overflow:"hidden",border:"1px solid rgba(255,255,255,.10)",boxShadow:"0 40px 120px rgba(0,0,0,.5)"}}>
@@ -403,13 +430,18 @@ function ArtistModal({artist, tracks, totalPlays, setNow, onClose}) {
               <p style={{color:"#94a3b8",fontSize:"17px",maxWidth:"720px"}}>{artist.bio || "Artiste indépendant sur Partage ta musique."}</p>
             </div>
 
-            <button className="primary">Suivre</button>
+            <button
+              className="primary"
+              onClick={() => toggleFollowArtist && toggleFollowArtist(artist.id)}
+            >
+              {isFollowed ? "Suivi ✓" : "Suivre"}
+            </button>
           </div>
 
           <div className="stats">
             <Info title={artist.track_count || tracks.length || 0} text="Titres"/>
             <Info title={totalPlays} text="Écoutes"/>
-            <Info title="0" text="Followers"/>
+            <Info title={isFollowed ? "1+" : "0"} text="Followers"/>
             <Info title={artist.is_verified ? "Oui" : "Non"} text="Certifié"/>
           </div>
 
