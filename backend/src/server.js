@@ -18,6 +18,7 @@ app.use("/api/tracks", require("./routes/tracks.routes"));
 app.use("/api/subscriptions", require("./routes/subscriptions.routes"));
 app.use("/api/reports", require("./routes/reports.routes"));
 app.use("/api/admin", require("./routes/admin.routes"));
+app.use("/api/likes", require("./routes/likes.routes"));
 
 app.use((err, req, res, next) => {
   console.error(err);
