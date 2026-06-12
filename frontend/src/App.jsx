@@ -249,22 +249,46 @@ function Admin({tracks, adminStats}){return <section className="page"><h1>Admin<
 function Production(){return <section className="page"><h1>Production</h1><div className="grid"><Info title="Frontend" text="Vercel"/><Info title="Backend" text="Render/Railway"/><Info title="DB" text="Supabase PostgreSQL"/><Info title="Audio" text="Supabase Storage"/><Info title="Paiement" text="Stripe"/><Info title="Légal" text="CGU/RGPD"/></div></section>}
 
 function ArtistCard({artist}) {
-  return <div className="artist-card">
-    <div className="artist-banner" style={artist.banner_url ? {backgroundImage:`url(${artist.banner_url})`} : {}}></div>
-    <div className="artist-body">
-      <div className="artist-avatar" style={artist.avatar_url ? {backgroundImage:`url(${artist.avatar_url})`} : {}}>
-        {!artist.avatar_url && "🎤"}
-      </div>
-      <div className="artist-name">{artist.public_name}</div>
-      <div className="artist-bio">{artist.bio || "Artiste indépendant sur Partage ta musique."}</div>
-      <div className="artist-meta">
-        <span>{artist.track_count || 0} titre(s)</span>
-        <span>{artist.is_verified ? "Certifié" : "Indépendant"}</span>
+  return (
+    <div
+      className="artist-card"
+      onClick={() => alert(`Profil artiste : ${artist.public_name}\n\nLa page artiste complète arrive dans la prochaine étape.`)}
+      style={{cursor:"pointer"}}
+    >
+      <div
+        className="artist-banner"
+        style={artist.banner_url ? {backgroundImage:`url(${artist.banner_url})`} : {}}
+      ></div>
+
+      <div className="artist-body">
+        <div
+          className="artist-avatar"
+          style={artist.avatar_url ? {backgroundImage:`url(${artist.avatar_url})`} : {}}
+        >
+          {!artist.avatar_url && "🎤"}
+        </div>
+
+        <div className="artist-name">{artist.public_name}</div>
+
+        <div className="artist-bio">
+          {artist.bio || "Artiste indépendant sur Partage ta musique."}
+        </div>
+
+        <div className="artist-meta">
+          <span>🎵 {artist.track_count || 0} titre(s)</span>
+          <span>{artist.is_verified ? "✅ Certifié" : "🚀 Indépendant"}</span>
+        </div>
+
+        <button
+          className="primary"
+          style={{width:"100%",marginTop:"14px"}}
+        >
+          Voir le profil
+        </button>
       </div>
     </div>
-  </div>
+  );
 }
-
 function Card({t,setNow}){
   return <div className="card">
     <div className="cover" style={t.cover_url ? {backgroundImage:`url(${t.cover_url})`, backgroundSize:"cover", backgroundPosition:"center"} : {}}>
