@@ -1,6 +1,5 @@
+import React, { useEffect, useState } from "react";
 console.log("APP VERSION TEST 999");
-import React, { useEffect, useState } from "react";
-import React, { useEffect, useState } from "react";
 import { createRoot } from "react-dom/client";
 import { Home, Search, Upload, BarChart3, Crown, Shield, User, Music, Cloud, PlusCircle } from "lucide-react";
 import { api, setAuthToken } from "./lib/api";
