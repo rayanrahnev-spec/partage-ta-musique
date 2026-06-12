@@ -152,16 +152,16 @@ function App() {
     }
   }
 
+  const filteredTracks = tracks.filter(t => {
+    const q = query.toLowerCase();
+    return `${t.title || ""} ${t.artist_name || ""} ${t.artist || ""} ${t.genre || ""}`.toLowerCase().includes(q);
+  });
+
   const selectedArtistTracks = selectedArtist
     ? tracks.filter(t => t.artist_id === selectedArtist.id || t.artist_name === selectedArtist.public_name)
     : [];
 
   const selectedArtistPlays = selectedArtistTracks.reduce((sum, t) => sum + (Number(t.plays) || 0), 0);
-
-  const filteredTracks = tracks.filter(t => {
-    const q = query.toLowerCase();
-    return `${t.title || ""} ${t.artist_name || ""} ${t.artist || ""} ${t.genre || ""}`.toLowerCase().includes(q);
-  });
 
   return <div className="app">
     <aside className="sidebar">
@@ -199,53 +199,17 @@ function App() {
       {page==="admin" && <Admin tracks={tracks} adminStats={adminStats}/>}
       {page==="production" && <Production/>}
     </main>
-{selectedArtist && (
-      <div className="artist-modal">
-        <div className="artist-profile">
-          <button className="modal-close" onClick={() => setSelectedArtist(null)}>✕</button>
 
-          <div
-            className="artist-profile-banner"
-            style={selectedArtist.banner_url ? { backgroundImage: `url(${selectedArtist.banner_url})` } : {}}
-          />
-
-          <div className="artist-profile-body">
-            <div
-              className="artist-profile-avatar"
-              style={selectedArtist.avatar_url ? { backgroundImage: `url(${selectedArtist.avatar_url})` } : {}}
-            >
-              {!selectedArtist.avatar_url && "🎤"}
-            </div>
-
-            <div className="artist-profile-head">
-              <div>
-                <span className="pill">Profil artiste</span>
-                <h1>{selectedArtist.public_name}</h1>
-                <p>{selectedArtist.bio || "Artiste indépendant sur Partage ta musique."}</p>
-              </div>
-
-              <button className="primary">Suivre</button>
-            </div>
-
-            <div className="stats">
-              <Info title={selectedArtist.track_count || selectedArtistTracks.length || 0} text="Titres"/>
-              <Info title={selectedArtistPlays} text="Écoutes"/>
-              <Info title="0" text="Followers"/>
-              <Info title={selectedArtist.is_verified ? "Oui" : "Non"} text="Certifié"/>
-            </div>
-
-            <SectionTitle title="Musiques de l’artiste" />
-            <div className="list">
-              {selectedArtistTracks.length ? (
-                selectedArtistTracks.map(t => <Row key={t.id} t={t} setNow={setNow}/>)
-              ) : (
-                <Empty text="Aucune musique trouvée pour cet artiste."/>
-              )}
-            </div>
-          </div>
-        </div>
-      </div>
+    {selectedArtist && (
+      <ArtistModal
+        artist={selectedArtist}
+        tracks={selectedArtistTracks}
+        totalPlays={selectedArtistPlays}
+        setNow={setNow}
+        onClose={() => setSelectedArtist(null)}
+      />
     )}
+
     <Player now={now}/>
   </div>
 }
@@ -277,11 +241,7 @@ function Landing({setPage, tracks, artists, setNow, setSelectedArtist}){
     <div className="cards">{latest.map(t=><Card key={t.id} t={t} setNow={setNow}/>)}</div>
 
     <SectionTitle title="Artistes à découvrir" action="Créer artiste" onClick={()=>setPage("artistCreate")}/>
-    <div className="artist-grid">{popularArtists.length ? popularArtists.map(a=><ArtistCard
-  key={a.id}
-  artist={a}
-  onOpen={setSelectedArtist}
-/>) : <Empty text="Crée ton premier artiste pour l’afficher ici."/>}</div>
+    <div className="artist-grid">{popularArtists.length ? popularArtists.map(a=><ArtistCard key={a.id} artist={a} onOpen={setSelectedArtist}/>) : <Empty text="Crée ton premier artiste pour l’afficher ici."/>}</div>
   </section>
 }
 
@@ -291,13 +251,9 @@ function SectionTitle({title, action, onClick}) {
 
 function HomePage({tracks,setNow}){return <section className="page"><h1>Musiques</h1><div className="cards">{tracks.map(t=><Card key={t.id} t={t} setNow={setNow}/>)}</div></section>}
 
-function Discover({tracks, artists, setNow, setSelectedArtist}){return <section className="page"><h1>Découvrir</h1><SectionTitle title="Artistes" /><div className="artist-grid">{artists.map(a=><ArtistCard
-  key={a.id}
-  artist={a}
-  onOpen={setSelectedArtist}
-/>)}</div><SectionTitle title="Catalogue" /><div className="list">{tracks.map(t=><Row key={t.id} t={t} setNow={setNow}/>)}</div></section>}
+function Discover({tracks, artists, setNow, setSelectedArtist}){return <section className="page"><h1>Découvrir</h1><SectionTitle title="Artistes" /><div className="artist-grid">{artists.map(a=><ArtistCard key={a.id} artist={a} onOpen={setSelectedArtist}/>)}</div><SectionTitle title="Catalogue" /><div className="list">{tracks.map(t=><Row key={t.id} t={t} setNow={setNow}/>)}</div></section>}
 
-function ArtistCreate({createArtist, artists, setSelectedArtist}){return <section className="page"><h1>Créer un profil artiste</h1><form className="panel" onSubmit={createArtist}><label>Nom artiste<input name="publicName" required placeholder="Ex : Rayan Studio"/></label><label>Bio<textarea name="bio" placeholder="Présente ton univers..."/></label><label>Avatar artiste<input name="avatar" type="file" accept="image/*"/></label><label>Bannière artiste<input name="banner" type="file" accept="image/*"/></label><button className="primary">Créer artiste</button></form><SectionTitle title="Artistes existants"/><div className="artist-grid">{artists.length ? artists.map(a=><ArtistCard key={a.id} artist={a} onOpen={setSelectedArtist}/>) : <Empty text="Aucun artiste pour l’instant."/ >}</div></section>}
+function ArtistCreate({createArtist, artists, setSelectedArtist}){return <section className="page"><h1>Créer un profil artiste</h1><form className="panel" onSubmit={createArtist}><label>Nom artiste<input name="publicName" required placeholder="Ex : Rayan Studio"/></label><label>Bio<textarea name="bio" placeholder="Présente ton univers..."/></label><label>Avatar artiste<input name="avatar" type="file" accept="image/*"/></label><label>Bannière artiste<input name="banner" type="file" accept="image/*"/></label><button className="primary">Créer artiste</button></form><SectionTitle title="Artistes existants"/><div className="artist-grid">{artists.length ? artists.map(a=><ArtistCard key={a.id} artist={a} onOpen={setSelectedArtist}/>) : <Empty text="Aucun artiste pour l’instant."/>}</div></section>}
 
 function UploadPage({uploadTrack, artists}){return <section className="page"><h1>Publier une musique</h1><div className="notice">Tu dois être connecté et avoir créé un artiste. Ajoute un MP3 et une image de couverture pour rendre le son plus professionnel.</div><form className="panel" onSubmit={uploadTrack}><label>Artiste<select name="artistId" required>{artists.map(a=><option key={a.id} value={a.id}>{a.public_name}</option>)}</select></label><label>Titre<input name="title" required placeholder="Titre du morceau"/></label><label>Genre<select name="genre"><option>Rap</option><option>Afro</option><option>R&B</option><option>Électro</option></select></label><label>Description<textarea name="description"/></label><label>Fichier audio<input name="audio" type="file" accept="audio/*" required/></label><label>Image de couverture<input name="cover" type="file" accept="image/*"/></label><div className="notice">En envoyant, tu confirmes que tu possèdes les droits et qu’il n’y a aucun sample non autorisé.</div><button className="primary">Uploader</button></form></section>}
 
@@ -311,29 +267,16 @@ function Production(){return <section className="page"><h1>Production</h1><div c
 
 function ArtistCard({artist,onOpen}) {
   return (
-    <div
-      className="artist-card"
-      onClick={() => onOpen && onOpen(artist)}
-      style={{ cursor: "pointer" }}
-    >
-      <div
-        className="artist-banner"
-        style={artist.banner_url ? { backgroundImage: `url(${artist.banner_url})` } : {}}
-      />
+    <div className="artist-card" onClick={() => onOpen && onOpen(artist)} style={{ cursor: "pointer" }}>
+      <div className="artist-banner" style={artist.banner_url ? {backgroundImage:`url(${artist.banner_url})`} : {}}></div>
 
       <div className="artist-body">
-        <div
-          className="artist-avatar"
-          style={artist.avatar_url ? { backgroundImage: `url(${artist.avatar_url})` } : {}}
-        >
+        <div className="artist-avatar" style={artist.avatar_url ? {backgroundImage:`url(${artist.avatar_url})`} : {}}>
           {!artist.avatar_url && "🎤"}
         </div>
 
         <div className="artist-name">{artist.public_name}</div>
-
-        <div className="artist-bio">
-          {artist.bio || "Artiste indépendant sur Partage ta musique."}
-        </div>
+        <div className="artist-bio">{artist.bio || "Artiste indépendant sur Partage ta musique."}</div>
 
         <div className="artist-meta">
           <span>🎵 {artist.track_count || 0} titre(s)</span>
@@ -342,7 +285,7 @@ function ArtistCard({artist,onOpen}) {
 
         <button
           className="primary"
-          style={{ width: "100%", marginTop: "14px" }}
+          style={{width:"100%",marginTop:"14px"}}
           onClick={(e) => {
             e.stopPropagation();
             onOpen && onOpen(artist);
@@ -354,6 +297,47 @@ function ArtistCard({artist,onOpen}) {
     </div>
   );
 }
+
+function ArtistModal({artist, tracks, totalPlays, setNow, onClose}) {
+  return (
+    <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,.86)",zIndex:9999,overflow:"auto",padding:"30px"}}>
+      <div style={{maxWidth:"1100px",margin:"0 auto 90px",background:"#0f172a",borderRadius:"32px",overflow:"hidden",border:"1px solid rgba(255,255,255,.10)",boxShadow:"0 40px 120px rgba(0,0,0,.5)"}}>
+        <button onClick={onClose} style={{position:"fixed",top:"28px",right:"28px",zIndex:10000,borderRadius:"999px",width:"48px",height:"48px",padding:0}}>✕</button>
+
+        <div style={{height:"290px",backgroundImage:artist.banner_url ? `linear-gradient(rgba(0,0,0,.05),rgba(0,0,0,.55)),url(${artist.banner_url})` : "linear-gradient(135deg,#7c3aed,#2563eb,#06b6d4)",backgroundSize:"cover",backgroundPosition:"center"}}></div>
+
+        <div style={{padding:"0 32px 34px"}}>
+          <div style={{display:"flex",gap:"22px",alignItems:"end",marginTop:"-72px",flexWrap:"wrap"}}>
+            <div style={{width:"150px",height:"150px",borderRadius:"50%",border:"7px solid #0f172a",backgroundImage:artist.avatar_url ? `url(${artist.avatar_url})` : "linear-gradient(135deg,#f97316,#ec4899)",backgroundSize:"cover",backgroundPosition:"center",display:"flex",alignItems:"center",justifyContent:"center",fontSize:"50px"}}>
+              {!artist.avatar_url && "🎤"}
+            </div>
+
+            <div style={{flex:1,minWidth:"250px"}}>
+              <span className="pill">Profil artiste</span>
+              <h1 style={{fontSize:"46px",margin:"10px 0 4px"}}>{artist.public_name}</h1>
+              <p style={{color:"#94a3b8",fontSize:"17px",maxWidth:"720px"}}>{artist.bio || "Artiste indépendant sur Partage ta musique."}</p>
+            </div>
+
+            <button className="primary">Suivre</button>
+          </div>
+
+          <div className="stats">
+            <Info title={artist.track_count || tracks.length || 0} text="Titres"/>
+            <Info title={totalPlays} text="Écoutes"/>
+            <Info title="0" text="Followers"/>
+            <Info title={artist.is_verified ? "Oui" : "Non"} text="Certifié"/>
+          </div>
+
+          <SectionTitle title="Musiques de l’artiste" />
+          <div className="list">
+            {tracks.length ? tracks.map(t => <Row key={t.id} t={t} setNow={setNow}/>) : <Empty text="Aucune musique trouvée pour cet artiste."/>}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function Card({t,setNow}){
   return <div className="card">
     <div className="cover" style={t.cover_url ? {backgroundImage:`url(${t.cover_url})`, backgroundSize:"cover", backgroundPosition:"center"} : {}}>
