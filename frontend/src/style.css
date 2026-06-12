@@ -69,3 +69,11 @@
   overflow-y: auto !important;
   padding: 30px !important;
 }
+.comments-modal{
+  position:fixed !important;
+  inset:0 !important;
+  z-index:99999999 !important;
+  background:rgba(0,0,0,.9) !important;
+  overflow:auto !important;
+  padding:30px !important;
+}
