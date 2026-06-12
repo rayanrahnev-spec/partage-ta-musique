@@ -430,12 +430,20 @@ function ArtistModal({artist, tracks, totalPlays, setNow, isFollowed, toggleFoll
               <p style={{color:"#94a3b8",fontSize:"17px",maxWidth:"720px"}}>{artist.bio || "Artiste indépendant sur Partage ta musique."}</p>
             </div>
 
-            <button
-              className="primary"
-              onClick={() => toggleFollowArtist && toggleFollowArtist(artist.id)}
-            >
-              {isFollowed ? "Suivi ✓" : "Suivre"}
-            </button>
+           <button
+  className="primary"
+  type="button"
+  onClick={(e) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    alert("FOLLOW CLICK");
+
+    toggleFollowArtist(artist.id);
+  }}
+>
+  {isFollowed ? "Suivi ✓" : "Suivre"}
+</button>
           </div>
 
           <div className="stats">
