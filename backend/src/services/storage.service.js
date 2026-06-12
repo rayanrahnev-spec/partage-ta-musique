@@ -1,30 +1,42 @@
-const { S3Client, PutObjectCommand } = require("@aws-sdk/client-s3");
+const { createClient } = require("@supabase/supabase-js");
 const crypto = require("crypto");
-const fs = require("fs");
+const fs = require("fs/promises");
 
-function getClient() {
-  return new S3Client({
-    region: "auto",
-    endpoint: process.env.R2_ENDPOINT,
-    credentials: {
-      accessKeyId: process.env.R2_ACCESS_KEY_ID || "demo",
-      secretAccessKey: process.env.R2_SECRET_ACCESS_KEY || "demo"
-    }
-  });
-}
+const supabase = createClient(
+  process.env.SUPABASE_URL,
+  process.env.SUPABASE_SERVICE_KEY
+);
 
 async function uploadAudio(file) {
   if (!file) throw new Error("Audio file required");
-  if (!process.env.R2_BUCKET || !process.env.R2_ENDPOINT) {
-    return { url: `/uploads/${file.filename}`, provider: "local-demo" };
+
+  const bucket = process.env.SUPABASE_BUCKET || "tracks";
+  const extension = file.originalname.split(".").pop();
+  const fileName = `${Date.now()}-${crypto.randomUUID()}.${extension}`;
+  const filePath = `audio/${fileName}`;
+
+  const fileBuffer = await fs.readFile(file.path);
+
+  const { error } = await supabase.storage
+    .from(bucket)
+    .upload(filePath, fileBuffer, {
+      contentType: file.mimetype,
+      upsert: false
+    });
+
+  if (error) {
+    throw new Error(error.message);
   }
-  const key = `tracks/${Date.now()}-${crypto.randomUUID()}-${file.originalname}`;
-  await getClient().send(new PutObjectCommand({
-    Bucket: process.env.R2_BUCKET,
-    Key: key,
-    Body: fs.createReadStream(file.path),
-    ContentType: file.mimetype
-  }));
-  return { url: `${process.env.R2_PUBLIC_URL}/${key}`, provider: "cloudflare-r2", key };
+
+  const { data } = supabase.storage
+    .from(bucket)
+    .getPublicUrl(filePath);
+
+  return {
+    url: data.publicUrl,
+    provider: "supabase-storage",
+    key: filePath
+  };
 }
+
 module.exports = { uploadAudio };
