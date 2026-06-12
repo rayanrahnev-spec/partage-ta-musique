@@ -21,6 +21,9 @@ function App() {
   const [adminStats, setAdminStats] = useState(null);
   const [query, setQuery] = useState("");
   const [selectedArtist, setSelectedArtist] = useState(null);
+  const [commentsTrack, setCommentsTrack] = useState(null);
+  const [comments, setComments] = useState([]);
+  const [commentText, setCommentText] = useState("");
 
   useEffect(() => {
     if (token) setAuthToken(token);
@@ -159,6 +162,51 @@ async function likeTrack(trackId) {
     }
   }
 
+  async function openComments(track) {
+    if (!track) return;
+    setCommentsTrack(track);
+    setCommentText("");
+
+    try {
+      const res = await api.get(`/comments/tracks/${track.id}`);
+      setComments(res.data.comments || []);
+    } catch {
+      setComments([]);
+    }
+  }
+
+  async function sendComment(e) {
+    e.preventDefault();
+
+    if (!commentsTrack) return;
+
+    const savedToken = localStorage.getItem("ptm_token");
+
+    if (!savedToken) {
+      alert("Connecte-toi d'abord.");
+      return;
+    }
+
+    const content = commentText.trim();
+
+    if (!content) {
+      alert("Écris un commentaire.");
+      return;
+    }
+
+    setAuthToken(savedToken);
+
+    try {
+      await api.post(`/comments/tracks/${commentsTrack.id}`, { content });
+      setCommentText("");
+
+      const res = await api.get(`/comments/tracks/${commentsTrack.id}`);
+      setComments(res.data.comments || []);
+    } catch (err) {
+      alert(err.response?.data?.error || "Impossible d'envoyer le commentaire.");
+    }
+  }
+
   async function checkout(plan) {
     try {
       const res = await api.post("/subscriptions/checkout", { plan });
@@ -236,7 +284,7 @@ async function likeTrack(trackId) {
       />
     )}
 
-  <Player now={now} likeTrack={likeTrack}/>
+  <Player now={now} likeTrack={likeTrack} openComments={openComments}/>
   </div>
 }
 
@@ -388,7 +436,7 @@ function Row({t,setNow}){
 function Info({title,text}){return <div className="info"><b>{title}</b><p>{text}</p></div>}
 function Empty({text}){return <div className="info"><b>Vide</b><p>{text}</p></div>}
 
-function Player({now, likeTrack}) {
+function Player({now, likeTrack, openComments}) {
   const src = now?.audio_url || "";
 
   return (
@@ -415,8 +463,77 @@ function Player({now, likeTrack}) {
 
       <div className="player-actions">
         <button onClick={() => now && likeTrack(now.id)}>❤️ {now?.likes || 0}</button>
+        <button onClick={() => now && openComments(now)}>💬</button>
         <button>⭐</button>
-        <button>⋯</button>
+      </div>
+    </div>
+  );
+}
+
+function CommentsModal({
+  track,
+  comments,
+  commentText,
+  setCommentText,
+  sendComment,
+  onClose
+}) {
+  return (
+    <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,.86)",zIndex:99999,overflow:"auto",padding:"30px"}}>
+      <div style={{maxWidth:"820px",margin:"0 auto 120px",background:"#0f172a",borderRadius:"30px",overflow:"hidden",border:"1px solid rgba(255,255,255,.10)",boxShadow:"0 40px 120px rgba(0,0,0,.5)"}}>
+        <button onClick={onClose} style={{position:"fixed",top:"28px",right:"28px",zIndex:100000,borderRadius:"999px",width:"48px",height:"48px",padding:0}}>✕</button>
+
+        <div style={{display:"grid",gridTemplateColumns:"140px 1fr",gap:"18px",padding:"24px",alignItems:"center"}}>
+          <div
+            className="cover"
+            style={{
+              height:"140px",
+              margin:0,
+              backgroundImage: track.cover_url ? `url(${track.cover_url})` : undefined,
+              backgroundSize:"cover",
+              backgroundPosition:"center"
+            }}
+          >
+            {!track.cover_url && "🎧"}
+          </div>
+
+          <div>
+            <span className="pill">Commentaires</span>
+            <h1 style={{margin:"12px 0 4px"}}>{track.title}</h1>
+            <p style={{color:"#94a3b8"}}>{track.artist_name || track.artist || "Artiste"} · {track.genre}</p>
+          </div>
+        </div>
+
+        <div style={{padding:"0 24px 24px"}}>
+          <form className="panel" style={{maxWidth:"none"}} onSubmit={sendComment}>
+            <label>
+              Ajouter un commentaire
+              <textarea
+                value={commentText}
+                onChange={(e) => setCommentText(e.target.value)}
+                placeholder="Écris ton avis sur ce morceau..."
+              />
+            </label>
+
+            <button className="primary">Envoyer</button>
+          </form>
+
+          <SectionTitle title="Commentaires" />
+
+          <div className="list">
+            {comments.length ? comments.map(c => (
+              <div className="row" key={c.id}>
+                <div className="thumb">💬</div>
+                <div>
+                  <b>{c.user_name || "Utilisateur"}</b>
+                  <p>{c.content}</p>
+                </div>
+              </div>
+            )) : (
+              <Empty text="Aucun commentaire pour l’instant. Sois le premier."/>
+            )}
+          </div>
+        </div>
       </div>
     </div>
   );
