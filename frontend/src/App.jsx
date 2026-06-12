@@ -133,22 +133,38 @@ function App() {
     }
   }
 async function likeTrack(trackId) {
-  const savedToken = localStorage.getItem("ptm_token");
+  function Player({now, likeTrack}) {
+  const src = now?.audio_url || "";
 
-  if (!savedToken) {
-    alert("Connecte-toi d'abord.");
-    return;
-  }
+  return (
+    <div className="player player-pro">
+      <div className="player-track">
+        <div
+          className="player-cover"
+          style={now?.cover_url ? { backgroundImage: `url(${now.cover_url})` } : {}}
+        >
+          {!now?.cover_url && "🎧"}
+        </div>
 
-  setAuthToken(savedToken);
+        <div>
+          <b>{now ? now.title : "Aucun titre sélectionné"}</b>
+          <p>{now ? (now.artist_name || now.artist || "Artiste") : "Choisis une musique"}</p>
+        </div>
+      </div>
 
-  try {
-    const res = await api.post(`/likes/tracks/${trackId}`);
-    await loadTracks();
-    alert(res.data.liked ? "Musique likée ❤️" : "Like retiré");
-  } catch (err) {
-    alert(err.response?.data?.error || "Impossible de liker.");
-  }
+      {src ? (
+        <audio src={src} controls autoPlay />
+      ) : (
+        <button onClick={() => alert("Choisis une vraie musique.")}>▶</button>
+      )}
+
+      <div className="player-actions">
+        <button onClick={() => now && likeTrack(now.id)}>❤️ {now?.likes || 0}</button>
+        <button>⭐</button>
+        <button>⋯</button>
+      </div>
+    </div>
+  );
 }
   async function checkout(plan) {
     try {
