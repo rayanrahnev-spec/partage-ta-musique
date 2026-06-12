@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from "react";
-console.log("APP VERSION TEST 999");
 import { createRoot } from "react-dom/client";
 import { Home, Search, Upload, BarChart3, Crown, Shield, User, Music, Cloud, PlusCircle } from "lucide-react";
 import { api, setAuthToken } from "./lib/api";
 import "./style.css";
+
+console.log("APP VERSION TEST 999");
 
 const demoTracks = [
   { id: "demo1", title: "Bruxelles Minuit", artist_name: "NOVA INDÉ", genre: "Rap", plays: 8200, likes: 540, icon: "🌃", audio_url: "" },
